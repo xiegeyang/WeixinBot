@@ -108,7 +108,7 @@ class WebWeixin(object):
         self.autoReplyMode = False
         self.syncHost = ''
         self.user_agent = 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_11_3) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/48.0.2564.109 Safari/537.36'
-        self.interactive = False
+        self.interactive = True
         self.autoOpen = False
         self.saveFolder = os.path.join(os.getcwd(), 'saved')
         self.saveSubFolders = {'webwxgeticon': 'icons', 'webwxgetheadimg': 'headimgs', 'webwxgetmsgimg': 'msgimgs',
@@ -798,13 +798,14 @@ class WebWeixin(object):
                 #    store
 #自己加的代码-------------------------------------------#
                 if self.autoReplyMode:
-                    ans = self._xiaodoubi(content) + '\n[微信机器人自动回复]'
-                    if self.webwxsendmsg(ans, msg['FromUserName']):
-                        print('自动回复: ' + ans)
-                        logging.info('自动回复: ' + ans)
-                    else:
-                        print('自动回复失败')
-                        logging.info('自动回复失败')
+                    if msg['FromUserName'][:2] != '@@':  #if it is not group chart
+                        ans = self._simsimi(content)+ '\n[微信机器人自动回复]'
+                        if self.webwxsendmsg(ans, msg['FromUserName']):
+                            print('自动回复: ' + ans)
+                            logging.info('自动回复: ' + ans)
+                        else:
+                            print('自动回复失败')
+                            logging.info('自动回复失败')
             elif msgType == 3:
                 image = self.webwxgetmsgimg(msgid)
                 raw_msg = {'raw_msg': msg,
@@ -1005,6 +1006,7 @@ class WebWeixin(object):
             print('[*] 自动回复模式 ... 开启')
             logging.debug('[*] 自动回复模式 ... 开启')
         else:
+            self.autoReplyMode = False
             print('[*] 自动回复模式 ... 关闭')
             logging.debug('[*] 自动回复模式 ... 关闭')
 
@@ -1128,7 +1130,6 @@ class WebWeixin(object):
     def _post(self, url: object, params: object, jsonfmt: object = True) -> object:
         if jsonfmt:
             data = (json.dumps(params)).encode()
-            
             request = urllib.request.Request(url=url, data=data)
             request.add_header(
                 'ContentType', 'application/json; charset=UTF-8')
@@ -1163,12 +1164,13 @@ class WebWeixin(object):
             return "让我一个人静静 T_T..."
 
     def _simsimi(self, word):
-        key = ''
+        key = "a7d7deb5-18a6-4260-98e3-7fd803dd495b"
         url = 'http://sandbox.api.simsimi.com/request.p?key=%s&lc=ch&ft=0.0&text=%s' % (
             key, word)
         r = requests.get(url)
-        ans = r.json()
-        if ans['result'] == '100':
+        text = r.text
+        ans = json.loads(text)
+        if ans['result'] == 100:
             return ans['response']
         else:
             return '你在说什么，风太大听不清列'

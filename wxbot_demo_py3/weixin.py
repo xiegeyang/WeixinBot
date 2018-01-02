@@ -799,7 +799,9 @@ class WebWeixin(object):
 #自己加的代码-------------------------------------------#
                 if self.autoReplyMode:
                     if msg['FromUserName'][:2] != '@@':  #if it is not group chart
-                        ans = self._simsimi(content)+ '\n[微信机器人自动回复]'
+                        ans = self._simsimi(content)
+                            ans = self._qingyunke(content)
+                        ans += '\n[我人不在，机器人回复-_-!]'
                         if self.webwxsendmsg(ans, msg['FromUserName']):
                             print('自动回复: ' + ans)
                             logging.info('自动回复: ' + ans)
@@ -1162,6 +1164,18 @@ class WebWeixin(object):
             return r.content
         except:
             return "让我一个人静静 T_T..."
+
+    def _qingyunke(self, word):
+        key = "free"
+        url = 'http://api.qingyunke.com/api.php?key=%s&appid=0&msg=%s' % (
+            key, word)
+        r = requests.get(url)
+        text = r.text
+        ans = json.loads(text)
+        if ans['result'] == 0:
+            return ans['content']
+        else:
+            return '让我一个人静静 T_T...'
 
     def _simsimi(self, word):
         key = "a7d7deb5-18a6-4260-98e3-7fd803dd495b"

@@ -800,6 +800,7 @@ class WebWeixin(object):
                 if self.autoReplyMode:
                     if msg['FromUserName'][:2] != '@@':  #if it is not group chart
                         ans = self._simsimi(content)
+                        if ans == '你在说什么，风太大听不清列': #if the simsimi api does not resonse
                             ans = self._qingyunke(content)
                         ans += '\n[我人不在，机器人回复-_-!]'
                         if self.webwxsendmsg(ans, msg['FromUserName']):
